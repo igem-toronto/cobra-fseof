@@ -12,7 +12,7 @@ FSEOFResults = collections.namedtuple("FSEOFResults", ["step", "scan", "fva"])
 
 
 def as_id(obj: Any) -> str:
-    return obj if ((obj is None) or isinstance(obj, str)) else obj.id
+    return obj if isinstance(obj, str) else obj.id
 
 
 def default_reactions(model: cobra.Model, exclude: List[str]) -> List[cobra.Reaction]:
