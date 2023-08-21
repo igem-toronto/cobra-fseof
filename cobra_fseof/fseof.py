@@ -88,7 +88,7 @@ def fseof(
         
         vmin = min(fluxes.values())
         vmax = max(fluxes.values())
-        target = (vmax * vmin > 0) and (abs(vmax) > abs(fluxes["flux0"]))
+        target = (vmax * vmin >= 0) and (abs(vmax) > abs(fluxes["flux0"]))
         scan_data.append({"target": target, "vmin": vmin, "vmax": vmax, **fluxes})
     scan_data = pd.DataFrame(scan_data, index=reactions)
 
