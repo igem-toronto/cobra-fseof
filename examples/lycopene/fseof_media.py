@@ -24,6 +24,6 @@ def simulate_LB_media(model: cobra.Model) -> None:
                       ]
 
     for metabolite in LB_MEDIA_COMP:
-        model.medium[metabolite] = 10
+        model.medium[metabolite] = 5
 
 
