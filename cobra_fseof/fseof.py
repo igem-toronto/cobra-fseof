@@ -36,8 +36,24 @@ def fseof(
     reactions: Optional[List[ReactionLike]] = None,
     optimizer: Optional[Callable[[cobra.Model], cobra.Solution]] = None,
 ) -> FSEOFResults:
-    model = model.copy()  # don't mutate base model
-    # relevant paper: https://tinyurl.com/5ec2hvc2
+    """
+
+    Args:
+        model:
+        num_steps:
+        enforced:
+        objective:
+        enforced_direction:
+        enforced_frac_opt:
+        reactions:
+        optimizer:
+
+    Returns:
+
+    """
+
+    model = model.copy()
+
     # Deal with default kwargs
     if reactions is None:
         reactions = default_reactions(model, [enforced, objective])
@@ -60,7 +76,6 @@ def fseof(
 
     # Scan across enforced fluxes
     step_data = []
-    # scan_solution is a list of solutions, each with a different enforced flux
     scan_solutions = []
     scan_fluxes = np.linspace(enforced_base, enforced_frac_opt * enforced_opt, num=num_steps)
 
@@ -77,15 +92,13 @@ def fseof(
     # Compile into tables
     step_data = pd.DataFrame(step_data, index=range(len(step_data)))
 
+    # From paper:
+    #   "The targets were selected by identifying fluxes that increased upon the
+    #   application of the enforced objective flux without changing the reaction’s
+    #   direction."
     scan_data = []
     for rxn_id in reactions:
-        # fluxes is a dictionary of fluxes for each reaction in the scan.
         fluxes = {f"flux{i}": S[rxn_id] for i, S in enumerate(scan_solutions)}
-
-        '''apply criteria presented in the paper: https://tinyurl.com/5ec2hvc2
-        "The targets were selected by identifying fluxes that increased upon the application of the 
-        enforced objective flux without changing the reaction’s direction."'''
-        
         vmin = min(fluxes.values())
         vmax = max(fluxes.values())
         target = (vmax * vmin >= 0) and (abs(vmax) > abs(fluxes["flux0"]))
@@ -125,20 +138,3 @@ def fseof(
     fva_data = fva_data.sort_values("rank", ascending=False)
 
     return FSEOFResults(step=step_data, scan=scan_data, fva=fva_data)
-
-
-# TODO: delete later (AL)
-def run():
-    from cobra.io import load_model
-
-    model = load_model("textbook")
-    print(model.reactions)
-    results = fseof(model, 10, "EX_succ_e", "Biomass_Ecoli_core")
-    print(results.step)
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-        print(results.scan)
-        print(results.fva)
-
-
-if __name__ == "__main__":
-    run()
