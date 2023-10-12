@@ -36,20 +36,42 @@ def fseof(
     reactions: Optional[List[ReactionLike]] = None,
     optimizer: Optional[Callable[[cobra.Model], cobra.Solution]] = None,
 ) -> FSEOFResults:
-    """
+    """Runs the FSEOF algorithm [1].
 
     Args:
-        model:
-        num_steps:
-        enforced:
-        objective:
-        enforced_direction:
-        enforced_frac_opt:
-        reactions:
-        optimizer:
+        model: the metabolic model on which to run FSEOF.
+        num_steps: the number of steps to interpolate between the initial
+            and highest enforced fluxes.
+        enforced: the enforced (e.g., product) reaction.
+        objective: the base objective (e.g., biomass) reaction.
+        enforced_direction: the direction in which FSEOF
+            optimizes the enforced reaction.
+        enforced_frac_opt: the fraction of the theoretical optimal enforced flux
+            to use as the upper interpolation boundary.
+        reactions: the space of reactions that FSEOF considers when searching for
+            targets. If None, this is set to all reactions in the input model.
+        optimizer: the FBA optimizer that is used. If None, this is set to
+            the regular COBRApy optimizer.
 
     Returns:
+        An named tuple, FSEOFResults, of pandas DataFrames whose fields are:
+        - step: Each row summarizes an interpolation step during FSEOF.
+            The index is the step ID and the enforced and objective fluxes are
+            stored as columns.
+        - scan: Each row corresponds to the flux data of a reaction during FSOEF.
+            The index is the reaction ID and the columns are: "target"
+            (a boolean for whether the reaction is considered a target),
+            "vmin" and "vmax" from the FSEOF algorithm, and "flux<i>" (the
+            flux of the reaction in the i-th interpolation step).
+        - fva: After FSEOF, Choi et al. [1] use FVA to further refine the
+            targets. Each row summarizes the FVA data of a target reaction
+            identified in the scan DataFrame. The index is the reaction ID
+            and the columns are: "rank" (the score of the target, higher meaning
+            better), and "min<i>" and "max<i>" (the flux bounds of the reaction
+            identified by FVA in the i-th interpolation step).
 
+    References:
+        [1] https://doi.org/10.1128/AEM.00115-10
     """
 
     model = model.copy()
@@ -74,9 +96,9 @@ def fseof(
         model.objective_direction = enforced_direction
         enforced_opt = optimizer(model).fluxes[enforced]
 
-    # Case if enforced reaction is synergistic with the objective
+    # FSEOF fails here since there is nothing to scan over
     if enforced_opt == enforced_base:
-        enforced_base = 0
+        raise ValueError("")
 
     # Scan across enforced fluxes
     step_data = []

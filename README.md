@@ -54,7 +54,8 @@ ______________________________________________________________________
 
 ### Lycopene Production 
  
-TBD
+In the `examples/lycopene` folder, we try to reproduce the results from Choi et al. (2010),
+where they use FSEOF to find gene amplification targets to enhance lycopene production in *E. coli*.
 
 ### iGEM Toronto 2023
 
