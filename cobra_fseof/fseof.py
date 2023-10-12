@@ -74,6 +74,10 @@ def fseof(
         model.objective_direction = enforced_direction
         enforced_opt = optimizer(model).fluxes[enforced]
 
+    # Case if enforced reaction is synergistic with the objective
+    if enforced_opt == enforced_base:
+        enforced_base = 0
+
     # Scan across enforced fluxes
     step_data = []
     scan_solutions = []
