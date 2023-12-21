@@ -98,7 +98,7 @@ def fseof(
 
     # FSEOF fails here since there is nothing to scan over
     if enforced_opt == enforced_base:
-        raise ValueError("")
+        raise ValueError()
 
     # Scan across enforced fluxes
     step_data = []
